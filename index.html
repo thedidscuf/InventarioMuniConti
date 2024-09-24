@@ -1,0 +1,2195 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario Municipal - Constitución</title>
+    <!-- Incluimos Font Awesome para los iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Incluimos jQuery UI para hacer los formularios desplazables -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+
+    <!-- Incluir ExcelJS para generar archivos Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <!-- Incluir Chart.js para generar gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Estilos existentes */
+        body,
+        html {
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+            background-color: #c0c0c0;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-size: 18px;
+        }
+
+        .window {
+            background-color: #d4d0c8;
+            border: 2px solid #fff;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            position: absolute;
+            padding: 2px;
+            z-index: 2;
+            top: 100px;
+            left: 100px;
+        }
+
+        .title-bar {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 3px 5px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            cursor: move;
+        }
+
+        .close-button {
+            background-color: #d4d0c8;
+            border: 1px solid #808080;
+            color: #000;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            cursor: pointer;
+        }
+
+        .content {
+            padding: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: inline-block;
+            width: 200px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 300px;
+            padding: 5px;
+            border: 1px solid #808080;
+            background-color: #fff;
+            font-size: 18px;
+        }
+
+        button {
+            background-color: #d4d0c8;
+            border: 2px solid #fff;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 5px;
+        }
+
+        button:active {
+            border: 2px solid #808080;
+            border-right-color: #fff;
+            border-bottom-color: #fff;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 5px;
+        }
+
+        #main-menu {
+            display: none;
+        }
+
+        .menu-bar {
+            background-color: #d4d0c8;
+            border-bottom: 1px solid #808080;
+            padding: 10px;
+            position: relative;
+            z-index: 3;
+        }
+
+        .menu-item {
+            display: inline-block;
+            margin-right: 20px;
+            cursor: pointer;
+            font-size: 20px;
+            position: relative;
+        }
+
+        .menu-content {
+            display: none;
+            position: absolute;
+            background-color: #d4d0c8;
+            border: 1px solid #808080;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 4;
+            left: 0;
+            top: 100%;
+        }
+
+        .menu-content a {
+            color: #000;
+            padding: 10px 20px;
+            text-decoration: none;
+            display: block;
+            font-size: 18px;
+        }
+
+        .menu-content a:hover {
+            background-color: #000080;
+            color: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+
+        th,
+        td {
+            border: 1px solid #808080;
+            padding: 10px;
+            text-align: left;
+            font-size: 18px;
+        }
+
+        th {
+            background-color: #d4d0c8;
+        }
+
+        .search-bar {
+            margin-bottom: 10px;
+        }
+
+        .search-bar input {
+            width: calc(100% - 200px);
+            font-size: 18px;
+        }
+
+        .action-button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            font-size: 16px;
+        }
+
+        /* Centramos el login window */
+        #login-window {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin: 0;
+        }
+
+        /* Estilos para el modal de cerrar sesión */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 5;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #d4d0c8;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #808080;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-buttons {
+            margin-top: 20px;
+        }
+
+        /* Imagen de fondo después del login */
+        #background-image {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('R (3).jpeg');
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+        }
+
+        /* Añadir estilo para el ícono de alerta */
+        #alerta-stock {
+            color: red;
+            cursor: pointer;
+        }
+
+        #qr-reader {
+            margin: auto;
+            max-width: 100%;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="login-window" class="window">
+        <div class="title-bar">
+            <span>Inicio de Sesión</span>
+            <span class="close-button">×</span>
+        </div>
+        <div class="content">
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Usuario:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Rol:</label>
+                    <select id="role" required>
+                        <option value="">Seleccione un rol</option>
+                        <option value="admin">Administrador</option>
+                        <option value="bodeguero">Bodeguero</option>
+                    </select>
+                </div>
+                <button type="submit">Iniciar Sesión</button>
+            </form>
+            <div id="login-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Imagen de fondo -->
+    <div id="background-image"></div>
+
+    <div id="main-menu">
+        <div class="menu-bar">
+            <div class="menu-item" onclick="toggleMenu('productos-menu')">
+                <i class="fas fa-box"></i> Productos
+                <div id="productos-menu" class="menu-content">
+                    <a href="#" data-form="agregar-producto">
+                        <i class="fas fa-plus-circle"></i> Agregar Producto
+                    </a>
+                    <a href="#" data-form="editar-producto">
+                        <i class="fas fa-edit"></i> Editar Producto
+                    </a>
+                    <a href="#" data-form="listar-productos">
+                        <i class="fas fa-list"></i> Listar Productos
+                    </a>
+                </div>
+            </div>
+            <div class="menu-item" onclick="toggleMenu('movimientos-menu')">
+                <i class="fas fa-exchange-alt"></i> Movimientos
+                <div id="movimientos-menu" class="menu-content">
+                    <a href="#" data-form="registrar-entrada">
+                        <i class="fas fa-arrow-down"></i> Registrar Entrada
+                    </a>
+                    <a href="#" data-form="registrar-salida">
+                        <i class="fas fa-arrow-up"></i> Registrar Salida
+                    </a>
+                    <a href="#" data-form="devolver-producto">
+                        <i class="fas fa-undo-alt"></i> Devolver Producto
+                    </a>
+                    <a href="#" data-form="historial-movimientos">
+                        <i class="fas fa-history"></i> Historial de Movimientos
+                    </a>
+                </div>
+            </div>
+            <div class="menu-item" onclick="toggleMenu('departamentos-menu')">
+                <i class="fas fa-building"></i> Departamentos
+                <div id="departamentos-menu" class="menu-content">
+                    <a href="#" data-form="agregar-departamento">
+                        <i class="fas fa-plus-circle"></i> Agregar Departamento
+                    </a>
+                    <a href="#" data-form="editar-departamento">
+                        <i class="fas fa-edit"></i> Editar Departamento
+                    </a>
+                    <a href="#" data-form="listar-departamentos">
+                        <i class="fas fa-list"></i> Listar Departamentos
+                    </a>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="showForm('historial-auditoria')">
+                <i class="fas fa-user-secret"></i> Historial de Auditoría
+            </div>
+
+            <!-- Menú de Usuarios -->
+            <div class="menu-item" onclick="toggleMenu('usuarios-menu')">
+                <i class="fas fa-users"></i> Usuarios
+                <div id="usuarios-menu" class="menu-content">
+                    <a href="#" data-form="agregar-usuario">
+                        <i class="fas fa-user-plus"></i> Agregar Usuario
+                    </a>
+                    <a href="#" data-form="listar-usuarios">
+                        <i class="fas fa-list"></i> Listar Usuarios
+                    </a>
+                </div>
+            </div>
+            <!-- Menú de Reportes -->
+            <div class="menu-item" onclick="toggleMenu('reportes-menu')">
+                <i class="fas fa-file-alt"></i> Reportes
+                <div id="reportes-menu" class="menu-content">
+                    <a href="#" data-form="generar-reporte">
+                        <i class="fas fa-file-excel"></i> Generar Reporte
+                    </a>
+                </div>
+            </div>
+            <div class="menu-item" onclick="openLogoutModal()">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </div>
+            <!-- Ícono de alerta de stock -->
+            <div id="alerta-stock" class="menu-item" style="display:none;">
+                <i class="fas fa-exclamation-triangle"></i> Alertas de Stock
+            </div>
+            <div class="menu-item" onclick="showForm('dashboard')">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </div>
+
+            <div class="menu-item" onclick="showForm('solicitar-producto')">
+                <i class="fas fa-shopping-cart"></i> Solicitar Producto
+            </div>
+
+            <div class="menu-item" onclick="showForm('gestionar-solicitudes')">
+                <i class="fas fa-tasks"></i> Gestionar Solicitudes
+            </div>
+
+
+
+        </div>
+    </div>
+
+    <!-- Historial de Auditoría -->
+    <div id="historial-auditoria" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Historial de Auditoría</span>
+            <span class="close-button" onclick="closeForm('historial-auditoria')">×</span>
+        </div>
+        <div class="content">
+            <table id="tabla-auditoria">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Acción</th>
+                        <th>Detalle</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Registros de auditoría se listarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Dashboard</span>
+            <span class="close-button" onclick="closeForm('dashboard')">×</span>
+        </div>
+        <div class="content">
+            <canvas id="grafico-entradas-salidas" width="400" height="200"></canvas>
+            <canvas id="grafico-productos-mas-usados" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+
+    <!-- Modal de confirmación de cierre de sesión -->
+    <div id="logout-modal" class="modal">
+        <div class="modal-content">
+            <p>¿Estás seguro de que deseas cerrar sesión?</p>
+            <div class="modal-buttons">
+                <button onclick="confirmLogout()">Sí</button>
+                <button onclick="closeLogoutModal()">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aquí se incluyen todos los formularios y ventanas modales -->
+    <!-- Agregar Usuario -->
+    <div id="agregar-usuario" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Agregar Usuario</span>
+            <span class="close-button" onclick="closeForm('agregar-usuario')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-agregar-usuario">
+                <div class="form-group">
+                    <label for="nuevo-username">Nombre de Usuario:</label>
+                    <input type="text" id="nuevo-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="nuevo-password">Contraseña:</label>
+                    <input type="password" id="nuevo-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="nuevo-role">Rol:</label>
+                    <select id="nuevo-role" required>
+                        <option value="">Seleccione un rol</option>
+                        <option value="admin">Administrador</option>
+                        <option value="bodeguero">Bodeguero</option>
+                    </select>
+                </div>
+                <button type="submit">Guardar Usuario</button>
+                <button type="button" onclick="closeForm('agregar-usuario')">Cancelar</button>
+            </form>
+            <div id="agregar-usuario-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Gestionar Solicitudes -->
+    <div id="gestionar-solicitudes" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Gestionar Solicitudes</span>
+            <span class="close-button" onclick="closeForm('gestionar-solicitudes')">×</span>
+        </div>
+        <div class="content">
+            <table id="tabla-solicitudes">
+                <thead>
+                    <tr>
+                        <th>Departamento</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Solicitudes se listarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- Listar Usuarios -->
+    <div id="listar-usuarios" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Listar Usuarios</span>
+            <span class="close-button" onclick="closeForm('listar-usuarios')">×</span>
+        </div>
+        <div class="content">
+            <table id="tabla-usuarios">
+                <thead>
+                    <tr>
+                        <th>Nombre de Usuario</th>
+                        <th>Rol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Usuarios se listarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Agregar Producto -->
+    <div id="agregar-producto" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Agregar Producto</span>
+            <span class="close-button" onclick="closeForm('agregar-producto')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-agregar-producto">
+                <div class="form-group">
+                    <label for="nombre-producto">Nombre:</label>
+                    <input type="text" id="nombre-producto" required>
+                </div>
+                <div class="form-group">
+                    <label for="cantidad-producto">Cantidad:</label>
+                    <input type="number" id="cantidad-producto" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion-producto">Descripción:</label>
+                    <input type="text" id="descripcion-producto" required>
+                </div>
+                <div class="form-group">
+                    <label for="minimo-producto">Stock Mínimo:</label>
+                    <input type="number" id="minimo-producto" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="codigo-producto">Código de Barras/QR:</label>
+                    <input type="text" id="codigo-producto" required>
+                </div>
+                <!-- Contenedor para el escáner -->
+                <div id="qr-reader" style="width: 300px; display: none;"></div>
+
+                <button type="submit">Guardar</button>
+                <button type="button" onclick="closeForm('agregar-producto')">Cancelar</button>
+            </form>
+            <div id="agregar-producto-error" class="error-message"></div>
+            <button type="button" onclick="iniciarEscanerCodigo()">Escanear Código</button>
+            <button type="button" onclick="iniciarEscanerCodigo()">Escanear Código</button>
+
+        </div>
+    </div>
+
+    <!-- Editar Producto -->
+    <div id="editar-producto" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Editar Producto</span>
+            <span class="close-button" onclick="closeForm('editar-producto')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-editar-producto">
+                <div class="form-group">
+                    <label for="select-producto">Seleccionar Producto:</label>
+                    <select id="select-producto" required>
+                        <option value="">Seleccione un producto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-nombre-producto">Nombre:</label>
+                    <input type="text" id="edit-nombre-producto" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-cantidad-producto">Cantidad:</label>
+                    <input type="number" id="edit-cantidad-producto" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-descripcion-producto">Descripción:</label>
+                    <input type="text" id="edit-descripcion-producto" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-minimo-producto">Stock Mínimo:</label>
+                    <input type="number" id="edit-minimo-producto" min="0" required>
+                </div>
+                <button type="submit">Guardar Cambios</button>
+                <button type="button" onclick="closeForm('editar-producto')">Cancelar</button>
+            </form>
+            <div id="editar-producto-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Solicitar Producto -->
+    <div id="solicitar-producto" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Solicitar Producto</span>
+            <span class="close-button" onclick="closeForm('solicitar-producto')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-solicitar-producto">
+                <div class="form-group">
+                    <label for="solicitud-departamento">Departamento:</label>
+                    <select id="solicitud-departamento" required>
+                        <!-- Agregar departamentos dinámicamente -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="solicitud-producto">Producto:</label>
+                    <select id="solicitud-producto" required>
+                        <!-- Agregar productos dinámicamente -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="solicitud-cantidad">Cantidad Solicitada:</label>
+                    <input type="number" id="solicitud-cantidad" min="1" required>
+                </div>
+                <button type="submit">Enviar Solicitud</button>
+                <button type="button" onclick="closeForm('solicitar-producto')">Cancelar</button>
+            </form>
+            <div id="solicitar-producto-error" class="error-message"></div>
+        </div>
+    </div>
+
+
+    <!-- Registrar Entrada -->
+    <div id="registrar-entrada" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Registrar Entrada</span>
+            <span class="close-button" onclick="closeForm('registrar-entrada')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-registrar-entrada">
+                <div class="form-group">
+                    <label for="entrada-producto">Producto:</label>
+                    <select id="entrada-producto" required>
+                        <option value="">Seleccione un producto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="entrada-cantidad">Cantidad:</label>
+                    <input type="number" id="entrada-cantidad" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="entrada-fecha">Fecha:</label>
+                    <input type="date" id="entrada-fecha" required>
+                </div>
+                <button type="submit">Registrar Entrada</button>
+                <button type="button" onclick="closeForm('registrar-entrada')">Cancelar</button>
+            </form>
+            <div id="registrar-entrada-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Registrar Salida -->
+    <div id="registrar-salida" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Registrar Salida</span>
+            <span class="close-button" onclick="closeForm('registrar-salida')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-registrar-salida">
+                <div class="form-group">
+                    <label for="salida-producto">Producto:</label>
+                    <select id="salida-producto" required>
+                        <option value="">Seleccione un producto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="salida-cantidad">Cantidad:</label>
+                    <input type="number" id="salida-cantidad" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="salida-departamento">Departamento:</label>
+                    <select id="salida-departamento" required>
+                        <option value="">Seleccione un departamento</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="salida-fecha">Fecha:</label>
+                    <input type="date" id="salida-fecha" required>
+                </div>
+                <button type="submit">Registrar Salida</button>
+                <button type="button" onclick="closeForm('registrar-salida')">Cancelar</button>
+            </form>
+            <div id="registrar-salida-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Devolver Producto -->
+    <div id="devolver-producto" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Devolver Producto</span>
+            <span class="close-button" onclick="closeForm('devolver-producto')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-devolver-producto">
+                <div class="form-group">
+                    <label for="devolver-departamento">Departamento:</label>
+                    <select id="devolver-departamento" required>
+                        <option value="">Seleccione un departamento</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="devolver-producto-select">Producto:</label>
+                    <select id="devolver-producto-select" required>
+                        <option value="">Seleccione un producto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="devolver-cantidad">Cantidad:</label>
+                    <input type="number" id="devolver-cantidad" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="devolver-fecha">Fecha:</label>
+                    <input type="date" id="devolver-fecha" required>
+                </div>
+                <button type="submit">Devolver Producto</button>
+                <button type="button" onclick="closeForm('devolver-producto')">Cancelar</button>
+            </form>
+            <div id="devolver-producto-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Agregar Departamento -->
+    <div id="agregar-departamento" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Agregar Departamento</span>
+            <span class="close-button" onclick="closeForm('agregar-departamento')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-agregar-departamento">
+                <div class="form-group">
+                    <label for="nombre-departamento">Nombre:</label>
+                    <input type="text" id="nombre-departamento" required>
+                </div>
+                <button type="submit">Guardar</button>
+                <button type="button" onclick="closeForm('agregar-departamento')">Cancelar</button>
+            </form>
+            <div id="agregar-departamento-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Editar Departamento -->
+    <div id="editar-departamento" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Editar Departamento</span>
+            <span class="close-button" onclick="closeForm('editar-departamento')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-editar-departamento">
+                <div class="form-group">
+                    <label for="select-departamento">Seleccionar Departamento:</label>
+                    <select id="select-departamento" required>
+                        <option value="">Seleccione un departamento</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-nombre-departamento">Nombre:</label>
+                    <input type="text" id="edit-nombre-departamento" required>
+                </div>
+                <button type="submit">Guardar Cambios</button>
+                <button type="button" onclick="closeForm('editar-departamento')">Cancelar</button>
+            </form>
+            <div id="editar-departamento-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Listar Productos -->
+    <div id="listar-productos" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Listar Productos</span>
+            <span class="close-button" onclick="closeForm('listar-productos')">×</span>
+        </div>
+        <div class="content">
+            <div class="search-bar">
+                <label for="buscar-producto">Buscar Producto:</label>
+                <input type="text" id="buscar-producto" placeholder="Ingrese nombre del producto">
+            </div>
+            <table id="tabla-productos">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cantidad</th>
+                        <th>Descripción</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Productos se listarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Eliminar Cantidad de Producto -->
+    <div id="eliminar-cantidad-producto" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Eliminar Cantidad de Producto</span>
+            <span class="close-button" onclick="closeForm('eliminar-cantidad-producto')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-eliminar-cantidad-producto">
+                <div class="form-group">
+                    <label for="eliminar-producto-nombre">Producto:</label>
+                    <input type="text" id="eliminar-producto-nombre" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="eliminar-producto-cantidad">Cantidad a Eliminar:</label>
+                    <input type="number" id="eliminar-producto-cantidad" min="1" required>
+                </div>
+                <button type="submit">Eliminar Cantidad</button>
+                <button type="button" onclick="closeForm('eliminar-cantidad-producto')">Cancelar</button>
+            </form>
+            <div id="eliminar-cantidad-producto-error" class="error-message"></div>
+        </div>
+    </div>
+
+
+    <!-- Historial de Movimientos -->
+    <div id="historial-movimientos" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Historial de Movimientos</span>
+            <span class="close-button" onclick="closeForm('historial-movimientos')">×</span>
+        </div>
+        <div class="content">
+            <table id="tabla-movimientos">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Fecha</th>
+                        <th>Departamento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Movimientos se listarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Listar Departamentos -->
+    <div id="listar-departamentos" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Listar Departamentos</span>
+            <span class="close-button" onclick="closeForm('listar-departamentos')">×</span>
+        </div>
+        <div class="content">
+            <div class="search-bar">
+                <label for="buscar-departamento">Buscar Departamento:</label>
+                <input type="text" id="buscar-departamento" placeholder="Ingrese nombre del departamento">
+            </div>
+            <table id="tabla-departamentos">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Productos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Departamentos se listarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Eliminar Cantidad de Producto en Departamento -->
+    <div id="eliminar-cantidad-departamento" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Eliminar Cantidad de Producto en Departamento</span>
+            <span class="close-button" onclick="closeForm('eliminar-cantidad-departamento')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-eliminar-cantidad-departamento">
+                <div class="form-group">
+                    <label for="eliminar-depto-nombre">Departamento:</label>
+                    <input type="text" id="eliminar-depto-nombre" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="eliminar-depto-producto-nombre">Producto:</label>
+                    <input type="text" id="eliminar-depto-producto-nombre" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="eliminar-depto-producto-cantidad">Cantidad a Eliminar:</label>
+                    <input type="number" id="eliminar-depto-producto-cantidad" min="1" required>
+                </div>
+                <button type="submit">Eliminar Cantidad</button>
+                <button type="button" onclick="closeForm('eliminar-cantidad-departamento')">Cancelar</button>
+            </form>
+            <div id="eliminar-cantidad-departamento-error" class="error-message"></div>
+        </div>
+    </div>
+
+
+    <!-- Generar Reporte -->
+    <div id="generar-reporte" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Generar Reporte</span>
+            <span class="close-button" onclick="closeForm('generar-reporte')">×</span>
+        </div>
+        <div class="content">
+            <form id="form-generar-reporte">
+                <div class="form-group">
+                    <label for="tipo-reporte">Tipo de Reporte:</label>
+                    <select id="tipo-reporte" required>
+                        <option value="">Seleccione un tipo de reporte</option>
+                        <option value="inventario">Inventario Actual</option>
+                        <option value="movimientos">Historial de Movimientos</option>
+                    </select>
+                </div>
+                <!-- Añadir filtros personalizados -->
+                <div id="filtros-personalizados" style="display:none;">
+                    <div class="form-group">
+                        <label for="filtro-fecha-desde">Fecha Desde:</label>
+                        <input type="date" id="filtro-fecha-desde">
+                    </div>
+                    <div class="form-group">
+                        <label for="filtro-fecha-hasta">Fecha Hasta:</label>
+                        <input type="date" id="filtro-fecha-hasta">
+                    </div>
+                    <div class="form-group">
+                        <label for="filtro-departamento">Departamento:</label>
+                        <select id="filtro-departamento">
+                            <option value="">Todos</option>
+                            <!-- Agregar departamentos dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filtro-tipo-movimiento">Tipo de Movimiento:</label>
+                        <select id="filtro-tipo-movimiento">
+                            <option value="">Todos</option>
+                            <option value="Entrada">Entrada</option>
+                            <option value="Salida">Salida</option>
+                            <option value="Devolución">Devolución</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filtro-producto">Producto:</label>
+                        <select id="filtro-producto">
+                            <option value="">Todos</option>
+                            <!-- Agregar productos dinámicamente -->
+                        </select>
+                    </div>
+                </div>
+                <button type="submit">Generar Reporte</button>
+                <button type="button" onclick="closeForm('generar-reporte')">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ventana para alertas de stock -->
+    <div id="ventana-alertas" class="window" style="display:none;">
+        <div class="title-bar">
+            <span>Alertas de Stock</span>
+            <span class="close-button" onclick="closeForm('ventana-alertas')">×</span>
+        </div>
+        <div class="content">
+            <table id="tabla-alertas">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Stock Mínimo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Productos con bajo stock se listarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Incluimos jQuery y el script JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Incluimos jQuery UI para arrastrar los formularios -->
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+
+    <script>
+        let productos = [];
+        let departamentos = [];
+        let movimientos = [];
+        let usuarioActual = null;
+        let usuarios = [];
+        let solicitudes = [];
+        let auditoria = [];
+
+        // Cargar desde localStorage
+        if (localStorage.getItem('solicitudes')) {
+            solicitudes = JSON.parse(localStorage.getItem('solicitudes'));
+        }
+
+        if (localStorage.getItem('auditoria')) {
+            auditoria = JSON.parse(localStorage.getItem('auditoria'));
+        }
+
+        /* Cargar usuarios desde localStorage al iniciar */
+        if (localStorage.getItem('usuarios')) {
+            usuarios = JSON.parse(localStorage.getItem('usuarios'));
+        } else {
+            /* Usuario administrador por defecto */
+            usuarios.push({ username: 'admin', password: 'admin123', role: 'admin' });
+            localStorage.setItem('usuarios', JSON.stringify(usuarios));
+        }
+
+        /* Cargar datos desde localStorage al iniciar */
+        if (localStorage.getItem('productos')) {
+            productos = JSON.parse(localStorage.getItem('productos'));
+        }
+        if (localStorage.getItem('departamentos')) {
+            departamentos = JSON.parse(localStorage.getItem('departamentos'));
+        }
+        if (localStorage.getItem('movimientos')) {
+            movimientos = JSON.parse(localStorage.getItem('movimientos'));
+        }
+
+        $(document).ready(function () {
+            /* Manejo del formulario de inicio de sesión */
+            $("#login-form").on("submit", function (e) {
+                e.preventDefault();
+                const username = $("#username").val();
+                const password = $("#password").val();
+                const role = $("#role").val();
+
+                /* Verificar si el usuario existe */
+                const usuario = usuarios.find(u => u.username === username && u.password === password && u.role === role);
+
+                if (usuario) {
+                    login(usuario);
+                } else {
+                    $("#login-error").text("Usuario o contraseña incorrectos");
+                }
+            });
+
+            /* Hacer los formularios arrastrables */
+            $(".window").draggable({
+                handle: ".title-bar",
+                containment: "window"
+            });
+
+            /* Cerrar menú al hacer clic fuera */
+            $(document).on("click", function (event) {
+                if (!$(event.target).closest('.menu-bar, .menu-item').length) {
+                    $(".menu-content").hide();
+                }
+            });
+
+            /* Manejar clics en los enlaces del submenú */
+            $('.menu-content a').on('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                const formId = $(this).data('form');
+                showForm(formId);
+            });
+
+            /* Formulario de Agregar Usuario */
+            $("#form-agregar-usuario").on("submit", function (e) {
+                e.preventDefault();
+                const username = $("#nuevo-username").val();
+                const password = $("#nuevo-password").val();
+                const role = $("#nuevo-role").val();
+
+                if (usuarios.some(u => u.username === username)) {
+                    $("#agregar-usuario-error").text("Ya existe un usuario con este nombre");
+                    return;
+                }
+
+                usuarios.push({ username, password, role });
+                localStorage.setItem('usuarios', JSON.stringify(usuarios));
+                alert("Usuario agregado con éxito");
+                $(this)[0].reset();
+            });
+
+            /* Formulario de Agregar Producto */
+            $("#form-agregar-producto").on("submit", function (e) {
+                e.preventDefault();
+                let nombre = $("#nombre-producto").val().toUpperCase();
+                const cantidad = parseInt($("#cantidad-producto").val());
+                let descripcion = $("#descripcion-producto").val().toUpperCase();
+                const minimo = parseInt($("#minimo-producto").val());
+                const codigo = $("#codigo-producto").val();
+
+                if (productos.some(p => p.nombre === nombre)) {
+                    $("#agregar-producto-error").text("Ya existe un producto con este nombre");
+                    return;
+                }
+
+                productos.push({
+                    nombre,
+                    cantidad,
+                    descripcion,
+                    minimo,
+                    creadoPor: usuarioActual,
+                    fechaCreacion: new Date().toISOString(),
+                    codigo,
+                });
+
+                guardarDatos();
+                actualizarListaProductos();
+                alert("Producto agregado con éxito");
+                $(this)[0].reset();
+                closeForm('agregar-producto');
+
+                // Registrar en auditoría
+                registrarAuditoria('Agregar Producto', `Se agregó el producto ${nombre}`);
+            });
+
+            /* Formulario de Editar Producto */
+            $("#form-editar-producto").on("submit", function (e) {
+                e.preventDefault();
+                let nombre = $("#edit-nombre-producto").val().toUpperCase();
+                const cantidad = parseInt($("#edit-cantidad-producto").val());
+                let descripcion = $("#edit-descripcion-producto").val().toUpperCase();
+                const minimo = parseInt($("#edit-minimo-producto").val());
+                const index = $("#select-producto").val();
+
+                if (index === "") {
+                    $("#editar-producto-error").text("Por favor, seleccione un producto");
+                    return;
+                }
+
+                if (productos.some((p, i) => p.nombre === nombre && i !== parseInt(index))) {
+                    $("#editar-producto-error").text("Ya existe otro producto con este nombre");
+                    return;
+                }
+
+                productos[index] = {
+                    ...productos[index],
+                    nombre,
+                    cantidad,
+                    descripcion,
+                    minimo
+                };
+
+                guardarDatos();
+                actualizarListaProductos();
+                alert("Producto actualizado con éxito");
+                $(this)[0].reset();
+                closeForm('editar-producto');
+                checkLowStock();
+
+                // Registrar en auditoría
+                registrarAuditoria('Editar Producto', `Se editó el producto ${nombre}`);
+            });
+
+            $("#select-producto").on("change", function () {
+                const index = $(this).val();
+
+                if (index !== "") {
+                    const producto = productos[index];
+                    $("#edit-nombre-producto").val(producto.nombre);
+                    $("#edit-cantidad-producto").val(producto.cantidad);
+                    $("#edit-descripcion-producto").val(producto.descripcion);
+                    $("#edit-minimo-producto").val(producto.minimo);
+                } else {
+                    $("#edit-nombre-producto").val("");
+                    $("#edit-cantidad-producto").val("");
+                    $("#edit-descripcion-producto").val("");
+                    $("#edit-minimo-producto").val("");
+                }
+            });
+
+            /* Formulario de Registrar Entrada */
+            $("#form-registrar-entrada").on("submit", function (e) {
+                e.preventDefault();
+                const productoIndex = $("#entrada-producto").val();
+                const cantidad = parseInt($("#entrada-cantidad").val());
+                const fecha = $("#entrada-fecha").val();
+
+                if (productoIndex === "") {
+                    $("#registrar-entrada-error").text("Por favor, seleccione un producto");
+                    return;
+                }
+
+                productos[productoIndex].cantidad += cantidad;
+                movimientos.push({
+                    tipo: "Entrada",
+                    producto: productos[productoIndex].nombre,
+                    cantidad,
+                    fecha: fecha || new Date().toISOString(),
+                    departamento: "-"
+                });
+
+                guardarDatos();
+                actualizarListaProductos();
+                alert("Entrada registrada con éxito");
+                $(this)[0].reset();
+                closeForm('registrar-entrada');
+                checkLowStock();
+
+                // Registrar en auditoría
+                registrarAuditoria('Registrar Entrada', `Entrada de ${cantidad} unidades del producto ${productos[productoIndex].nombre}`);
+            });
+
+            /* Formulario de Registrar Salida */
+            $("#form-registrar-salida").on("submit", function (e) {
+                e.preventDefault();
+                const productoIndex = $("#salida-producto").val();
+                const cantidad = parseInt($("#salida-cantidad").val());
+                const departamentoIndex = $("#salida-departamento").val();
+                const fecha = $("#salida-fecha").val();
+
+                if (productoIndex === "" || departamentoIndex === "") {
+                    $("#registrar-salida-error").text("Por favor, seleccione un producto y un departamento");
+                    return;
+                }
+
+                if (productos[productoIndex].cantidad < cantidad) {
+                    $("#registrar-salida-error").text("No hay suficiente stock disponible");
+                    return;
+                }
+
+                productos[productoIndex].cantidad -= cantidad;
+
+                /* Añadir producto al departamento */
+                const departamento = departamentos[departamentoIndex];
+                let productoDepto = departamento.productos.find(p => p.nombre === productos[productoIndex].nombre);
+                if (productoDepto) {
+                    productoDepto.cantidad += cantidad;
+                } else {
+                    departamento.productos.push({
+                        nombre: productos[productoIndex].nombre,
+                        cantidad
+                    });
+                }
+
+                movimientos.push({
+                    tipo: "Salida",
+                    producto: productos[productoIndex].nombre,
+                    cantidad,
+                    fecha: fecha || new Date().toISOString(),
+                    departamento: departamento.nombre
+                });
+
+                guardarDatos();
+                actualizarListaProductos();
+                alert("Salida registrada con éxito");
+                $(this)[0].reset();
+                closeForm('registrar-salida');
+                checkLowStock();
+
+                // Registrar en auditoría
+                registrarAuditoria('Registrar Salida', `Salida de ${cantidad} unidades del producto ${productos[productoIndex].nombre} al departamento ${departamento.nombre}`);
+            });
+
+            /* Formulario de Devolver Producto */
+            $("#form-devolver-producto").on("submit", function (e) {
+                e.preventDefault();
+                const departamentoIndex = $("#devolver-departamento").val();
+                const productoIndex = $("#devolver-producto-select").val();
+                const cantidad = parseInt($("#devolver-cantidad").val());
+                const fecha = $("#devolver-fecha").val();
+
+                if (departamentoIndex === "" || productoIndex === "") {
+                    $("#devolver-producto-error").text("Por favor, seleccione un departamento y un producto");
+                    return;
+                }
+
+                const departamento = departamentos[departamentoIndex];
+                const productoDepto = departamento.productos[productoIndex];
+
+                if (productoDepto.cantidad < cantidad) {
+                    $("#devolver-producto-error").text("La cantidad a devolver es mayor que la cantidad en el departamento");
+                    return;
+                }
+
+                // Restar la cantidad del departamento
+                productoDepto.cantidad -= cantidad;
+
+                // Si la cantidad del producto en el departamento es cero, eliminarlo
+                if (productoDepto.cantidad === 0) {
+                    departamento.productos.splice(productoIndex, 1);
+                }
+
+                // Añadir la cantidad al inventario principal
+                const productoInventario = productos.find(p => p.nombre === productoDepto.nombre);
+                if (productoInventario) {
+                    productoInventario.cantidad += cantidad;
+                } else {
+                    // Si el producto no existe en el inventario principal, agregarlo
+                    productos.push({ nombre: productoDepto.nombre, cantidad, descripcion: "", minimo: 0 });
+                }
+
+                // Registrar el movimiento
+                movimientos.push({
+                    tipo: "Devolución",
+                    producto: productoDepto.nombre,
+                    cantidad,
+                    fecha: fecha || new Date().toISOString(),
+                    departamento: departamento.nombre
+                });
+
+                guardarDatos();
+                actualizarListaProductos();
+                alert("Producto devuelto con éxito");
+                $(this)[0].reset();
+                closeForm('devolver-producto');
+                $("#devolver-producto-select").empty().append('<option value="">Seleccione un producto</option>');
+                checkLowStock();
+
+                // Registrar en auditoría
+                registrarAuditoria('Devolución', `Devolución de ${cantidad} unidades del producto ${productoDepto.nombre} del departamento ${departamento.nombre}`);
+            });
+
+            /* Manejar cambio en el select de departamento en Devolver Producto */
+            $("#devolver-departamento").on("change", function () {
+                const departamentoIndex = $(this).val();
+                const $selectProducto = $("#devolver-producto-select").empty();
+                $selectProducto.append('<option value="">Seleccione un producto</option>');
+                if (departamentoIndex !== "") {
+                    const productosDepto = departamentos[departamentoIndex].productos;
+                    productosDepto.forEach((producto, index) => {
+                        $selectProducto.append(`<option value="${index}">${producto.nombre} (Cantidad: ${producto.cantidad})</option>`);
+                    });
+                }
+            });
+
+            /* Formulario de Agregar Departamento */
+            $("#form-agregar-departamento").on("submit", function (e) {
+                e.preventDefault();
+                let nombre = $("#nombre-departamento").val().toUpperCase();
+
+                if (departamentos.some(d => d.nombre === nombre)) {
+                    $("#agregar-departamento-error").text("Ya existe un departamento con este nombre");
+                    return;
+                }
+
+                departamentos.push({ nombre, productos: [] });
+                guardarDatos();
+                actualizarListaDepartamentos();
+                alert("Departamento agregado con éxito");
+                $(this)[0].reset();
+                closeForm('agregar-departamento');
+
+                // Registrar en auditoría
+                registrarAuditoria('Agregar Departamento', `Se agregó el departamento ${nombre}`);
+            });
+
+            /* Formulario de Editar Departamento */
+            $("#form-editar-departamento").on("submit", function (e) {
+                e.preventDefault();
+                let nombre = $("#edit-nombre-departamento").val().toUpperCase();
+                const index = $("#select-departamento").val();
+
+                if (index === "") {
+                    $("#editar-departamento-error").text("Por favor, seleccione un departamento");
+                    return;
+                }
+
+                if (departamentos.some((d, i) => d.nombre === nombre && i !== parseInt(index))) {
+                    $("#editar-departamento-error").text("Ya existe otro departamento con este nombre");
+                    return;
+                }
+
+                departamentos[index].nombre = nombre;
+                guardarDatos();
+                actualizarListaDepartamentos();
+                alert("Departamento actualizado con éxito");
+                $(this)[0].reset();
+                closeForm('editar-departamento');
+
+                // Registrar en auditoría
+                registrarAuditoria('Editar Departamento', `Se editó el departamento ${nombre}`);
+            });
+
+            $("#select-departamento").on("change", function () {
+                const index = $(this).val();
+
+                if (index !== "") {
+                    const departamento = departamentos[index];
+                    $("#edit-nombre-departamento").val(departamento.nombre);
+                } else {
+                    $("#edit-nombre-departamento").val("");
+                }
+            });
+
+            scanner.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: 250,
+                    formatsToSupport: [
+                        Html5QrcodeSupportedFormats.EAN_13,
+                        Html5QrcodeSupportedFormats.CODE_128,
+                        // Agrega otros formatos si es necesario
+                    ]
+                },
+                // Funciones de éxito y error...
+            );
+
+            /* Buscador de Productos */
+            $("#buscar-producto").on("keyup", function () {
+                const filtro = $(this).val().toUpperCase();
+                listarProductos(filtro);
+            });
+
+            /* Buscador de Departamentos */
+            $("#buscar-departamento").on("keyup", function () {
+                const filtro = $(this).val().toUpperCase();
+                listarDepartamentos(filtro);
+            });
+
+            /* Formulario de Generar Reporte */
+            $("#form-generar-reporte").on("submit", function (e) {
+                e.preventDefault();
+                const tipoReporte = $("#tipo-reporte").val();
+                generarReporte(tipoReporte);
+            });
+
+            /* Formulario de Solicitar Producto */
+            $("#form-solicitar-producto").on("submit", function (e) {
+                e.preventDefault();
+                const departamentoIndex = $("#solicitud-departamento").val();
+                const productoIndex = $("#solicitud-producto").val();
+                const cantidad = parseInt($("#solicitud-cantidad").val());
+
+                if (departamentoIndex === "" || productoIndex === "") {
+                    $("#solicitar-producto-error").text("Por favor, seleccione un departamento y un producto");
+                    return;
+                }
+
+                solicitudes.push({
+                    departamento: departamentos[departamentoIndex].nombre,
+                    producto: productos[productoIndex].nombre,
+                    cantidad,
+                    fecha: new Date().toISOString(),
+                    estado: "Pendiente",
+                });
+
+                localStorage.setItem('solicitudes', JSON.stringify(solicitudes));
+                alert("Solicitud enviada con éxito");
+                $(this)[0].reset();
+                closeForm('solicitar-producto');
+            });
+
+            /* Inicializar selectores en formularios */
+            actualizarListaProductos();
+            actualizarListaDepartamentos();
+            actualizarSelectDepartamentosSolicitud();
+            actualizarListaProductosSolicitud();
+
+            /* Inicializar fechas en formularios */
+            $("#entrada-fecha, #salida-fecha, #devolver-fecha").val(new Date().toISOString().split('T')[0]);
+        });
+
+        /* Función para iniciar sesión */
+        function login(usuario) {
+            usuarioActual = usuario.username;
+            const role = usuario.role;
+            $("#login-window").hide();
+            $("#main-menu").show();
+            $("#background-image").show(); // Mostrar la imagen de fondo
+            actualizarListaProductos();
+            actualizarListaDepartamentos();
+            checkLowStock();
+
+            /* Si el usuario no es administrador, ocultar el menú de Usuarios y funciones restringidas */
+            if (role !== 'admin') {
+                $(".menu-item:contains('Usuarios')").hide();
+                $(".menu-item:contains('Historial de Auditoría')").hide();
+                $(".menu-item:contains('Gestionar Solicitudes')").hide();
+            } else {
+                $(".menu-item:contains('Usuarios')").show();
+                $(".menu-item:contains('Historial de Auditoría')").show();
+                $(".menu-item:contains('Gestionar Solicitudes')").show();
+            }
+        }
+
+        /* Funciones para manejar el cierre de sesión */
+        function openLogoutModal() {
+            $("#logout-modal").show();
+        }
+
+        function closeLogoutModal() {
+            $("#logout-modal").hide();
+        }
+
+        function confirmLogout() {
+            usuarioActual = null;
+            $("#main-menu").hide();
+            $("#background-image").hide(); // Ocultar la imagen de fondo
+            $("#login-window").show();
+            $("#username").val("");
+            $("#password").val("");
+            $("#role").val("");
+            $("#logout-modal").hide();
+        }
+
+        /* Funciones para manejar el menú */
+        function toggleMenu(menuId) {
+            const $menu = $("#" + menuId);
+            if ($menu.is(":visible")) {
+                $menu.hide();
+            } else {
+                $(".menu-content").hide(); // Cerrar otros menús
+                $menu.show();
+            }
+        }
+
+        /* Funciones para mostrar y cerrar formularios */
+        function showForm(formId) {
+            // Verificar si el usuario actual es administrador antes de mostrar formularios de usuarios
+            if (formId.startsWith("agregar-usuario") || formId.startsWith("listar-usuarios") || formId === "historial-auditoria" || formId === "gestionar-solicitudes") {
+                const usuario = usuarios.find(u => u.username === usuarioActual);
+                if (usuario.role !== 'admin') {
+                    alert("No tienes permiso para acceder a esta sección.");
+                    return;
+                }
+            }
+
+            $(".window").not("#" + formId).hide(); // Ocultar otros formularios
+            $("#" + formId).show();
+            $(".menu-content").hide(); // Cerrar el menú
+
+            // Actualizar contenido según el formulario mostrado
+            if (formId === "listar-productos") {
+                listarProductos();
+            } else if (formId === "historial-movimientos") {
+                listarMovimientos();
+            } else if (formId === "editar-departamento") {
+                actualizarSelectDepartamentos();
+            } else if (formId === "listar-departamentos") {
+                listarDepartamentos();
+            } else if (formId === "editar-producto") {
+                actualizarListaProductos();
+            } else if (formId === "registrar-salida") {
+                actualizarListaProductos();
+                actualizarListaDepartamentos();
+            } else if (formId === "listar-usuarios") {
+                listarUsuarios();
+            } else if (formId === "devolver-producto") {
+                actualizarListaDepartamentosDevolver();
+            } else if (formId === "agregar-usuario") {
+                // Nada adicional por ahora
+            } else if (formId === "solicitar-producto") {
+                actualizarSelectDepartamentosSolicitud();
+                actualizarListaProductosSolicitud();
+            } else if (formId === "gestionar-solicitudes") {
+                listarSolicitudes();
+            } else if (formId === "historial-auditoria") {
+                listarAuditoria();
+            }
+
+            if (formId === "dashboard") {
+                mostrarGraficoEntradasSalidas();
+                mostrarGraficoProductosMasUsados();
+            }
+
+            if (formId === "ventana-alertas") {
+                // Nada adicional por ahora
+            }
+        }
+
+        function closeForm(formId) {
+            $("#" + formId).hide();
+            $(".error-message").text("");
+        }
+
+        /* Funciones para actualizar listas y selects */
+        function actualizarListaProductos() {
+            const $selectProducto = $("#select-producto, #entrada-producto, #salida-producto").empty();
+            $selectProducto.append('<option value="">Seleccione un producto</option>');
+            productos.forEach((producto, index) => {
+                $selectProducto.append(`<option value="${index}">${producto.nombre} (Stock: ${producto.cantidad})</option>`);
+            });
+        }
+
+        function actualizarListaProductosSolicitud() {
+            const $selectProducto = $("#solicitud-producto").empty();
+            $selectProducto.append('<option value="">Seleccione un producto</option>');
+            productos.forEach((producto, index) => {
+                $selectProducto.append(`<option value="${index}">${producto.nombre}</option>`);
+            });
+        }
+
+        function actualizarListaDepartamentos() {
+            actualizarSelectDepartamentos();
+            const $selectDepartamento = $("#salida-departamento").empty();
+            $selectDepartamento.append('<option value="">Seleccione un departamento</option>');
+            departamentos.forEach((departamento, index) => {
+                $selectDepartamento.append(`<option value="${index}">${departamento.nombre}</option>`);
+            });
+        }
+
+        function actualizarSelectDepartamentos() {
+            const $selectDepartamento = $("#select-departamento").empty();
+            $selectDepartamento.append('<option value="">Seleccione un departamento</option>');
+            departamentos.forEach((departamento, index) => {
+                $selectDepartamento.append(`<option value="${index}">${departamento.nombre}</option>`);
+            });
+        }
+
+        function actualizarSelectDepartamentosSolicitud() {
+            const $selectDepartamento = $("#solicitud-departamento").empty();
+            $selectDepartamento.append('<option value="">Seleccione un departamento</option>');
+            departamentos.forEach((departamento, index) => {
+                $selectDepartamento.append(`<option value="${index}">${departamento.nombre}</option>`);
+            });
+        }
+
+        function actualizarListaDepartamentosDevolver() {
+            const $selectDepartamento = $("#devolver-departamento").empty();
+            $selectDepartamento.append('<option value="">Seleccione un departamento</option>');
+            departamentos.forEach((departamento, index) => {
+                $selectDepartamento.append(`<option value="${index}">${departamento.nombre}</option>`);
+            });
+            $("#devolver-producto-select").empty().append('<option value="">Seleccione un producto</option>');
+        }
+
+        function listarProductos(filtro = "") {
+            const $tbody = $("#tabla-productos tbody");
+            $tbody.empty();
+
+            productos.forEach((producto, index) => {
+                if (producto.nombre.includes(filtro)) {
+                    $tbody.append(`
+                <tr>
+                    <td>${producto.nombre}</td>
+                    <td>${producto.cantidad}</td>
+                    <td>${producto.descripcion}</td>
+                    <td>
+                        <button class="action-button" onclick="mostrarEliminarCantidad(${index})">Eliminar Cantidad</button>
+                    </td>
+                </tr>
+            `);
+                }
+            });
+        }
+
+        function listarMovimientos() {
+            const $tbody = $("#tabla-movimientos tbody");
+            $tbody.empty();
+
+            movimientos.forEach((movimiento) => {
+                $tbody.append(`
+                <tr>
+                    <td>${movimiento.tipo}</td>
+                    <td>${movimiento.producto}</td>
+                    <td>${movimiento.cantidad}</td>
+                    <td>${new Date(movimiento.fecha).toLocaleString()}</td>
+                    <td>${movimiento.departamento}</td>
+                </tr>
+            `);
+            });
+        }
+
+        function listarDepartamentos(filtro = "") {
+            const $tbody = $("#tabla-departamentos tbody");
+            $tbody.empty();
+
+            departamentos.forEach((departamento, deptoIndex) => {
+                if (departamento.nombre.includes(filtro)) {
+                    departamento.productos.forEach((producto, prodIndex) => {
+                        $tbody.append(`
+                        <tr>
+                            <td>${departamento.nombre}</td>
+                            <td>${producto.nombre} (${producto.cantidad})</td>
+                            <td>
+                                <button class="action-button" onclick="mostrarEliminarCantidadDepartamento(${deptoIndex}, ${prodIndex})">Eliminar Cantidad</button>
+                            </td>
+                        </tr>
+                    `);
+                    });
+                }
+            });
+        }
+
+        function listarUsuarios() {
+            const $tbody = $("#tabla-usuarios tbody");
+            $tbody.empty();
+
+            usuarios.forEach((usuario) => {
+                $tbody.append(`
+                <tr>
+                    <td>${usuario.username}</td>
+                    <td>${usuario.role}</td>
+                </tr>
+            `);
+            });
+        }
+
+        function listarSolicitudes() {
+            const $tbody = $("#tabla-solicitudes tbody");
+            $tbody.empty();
+
+            solicitudes.forEach((solicitud, index) => {
+                $tbody.append(`
+                <tr>
+                    <td>${solicitud.departamento}</td>
+                    <td>${solicitud.producto}</td>
+                    <td>${solicitud.cantidad}</td>
+                    <td>${new Date(solicitud.fecha).toLocaleString()}</td>
+                    <td>${solicitud.estado}</td>
+                    <td>
+                        ${solicitud.estado === "Pendiente" ? `
+                            <button class="action-button" onclick="aprobarSolicitud(${index})">Aprobar</button>
+                            <button class="action-button" onclick="rechazarSolicitud(${index})">Rechazar</button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `);
+            });
+        }
+
+        function aprobarSolicitud(index) {
+            const solicitud = solicitudes[index];
+
+            // Verificar si hay suficiente stock
+            const producto = productos.find(p => p.nombre === solicitud.producto);
+            if (producto.cantidad < solicitud.cantidad) {
+                alert("No hay suficiente stock para aprobar la solicitud");
+                return;
+            }
+
+            // Registrar salida
+            movimientos.push({
+                tipo: "Salida",
+                producto: solicitud.producto,
+                cantidad: solicitud.cantidad,
+                fecha: new Date().toISOString(),
+                departamento: solicitud.departamento,
+            });
+
+            // Actualizar stock
+            producto.cantidad -= solicitud.cantidad;
+
+            // Actualizar estado de la solicitud
+            solicitud.estado = "Aprobada";
+            localStorage.setItem('solicitudes', JSON.stringify(solicitudes));
+
+            guardarDatos();
+            listarSolicitudes();
+            actualizarListaProductos();
+            listarMovimientos();
+            alert("Solicitud aprobada y salida registrada");
+
+            // Registrar en auditoría
+            registrarAuditoria('Aprobar Solicitud', `Solicitud aprobada para el producto ${solicitud.producto} al departamento ${solicitud.departamento}`);
+        }
+
+        function rechazarSolicitud(index) {
+            solicitudes[index].estado = "Rechazada";
+            localStorage.setItem('solicitudes', JSON.stringify(solicitudes));
+            listarSolicitudes();
+            alert("Solicitud rechazada");
+
+            // Registrar en auditoría
+            registrarAuditoria('Rechazar Solicitud', `Solicitud rechazada para el producto ${solicitudes[index].producto} al departamento ${solicitudes[index].departamento}`);
+        }
+
+        /* Función para eliminar producto */
+        let productoEliminarIndex = null;
+
+        function mostrarEliminarCantidad(index) {
+            productoEliminarIndex = index;
+            const producto = productos[index];
+            $("#eliminar-producto-nombre").val(producto.nombre);
+            $("#eliminar-producto-cantidad").attr("max", producto.cantidad);
+            $("#eliminar-producto-cantidad").val(1);
+            showForm('eliminar-cantidad-producto');
+        }
+
+        $("#form-eliminar-cantidad-producto").on("submit", function (e) {
+            e.preventDefault();
+            const cantidadAEliminar = parseInt($("#eliminar-producto-cantidad").val());
+            const producto = productos[productoEliminarIndex];
+
+            if (cantidadAEliminar > producto.cantidad) {
+                $("#eliminar-cantidad-producto-error").text("La cantidad a eliminar es mayor que el stock disponible.");
+                return;
+            }
+
+            producto.cantidad -= cantidadAEliminar;
+
+            if (producto.cantidad === 0) {
+                // Opcional: Eliminar el producto si la cantidad es cero
+                if (confirm("La cantidad del producto ha llegado a cero. ¿Desea eliminar el producto del inventario?")) {
+                    productos.splice(productoEliminarIndex, 1);
+                }
+            }
+
+            guardarDatos();
+            actualizarListaProductos();
+            listarProductos();
+            alert("Cantidad eliminada con éxito");
+            closeForm('eliminar-cantidad-producto');
+            checkLowStock();
+
+            // Registrar en auditoría
+            registrarAuditoria('Eliminar Cantidad Producto', `Se eliminaron ${cantidadAEliminar} unidades del producto ${producto.nombre}`);
+        });
+
+        /* Funciones para eliminar cantidad en departamento */
+        let deptoEliminarIndex = null;
+        let productoDeptoEliminarIndex = null;
+
+        function mostrarEliminarCantidadDepartamento(deptoIndex, prodIndex) {
+            deptoEliminarIndex = deptoIndex;
+            productoDeptoEliminarIndex = prodIndex;
+            const departamento = departamentos[deptoIndex];
+            const producto = departamento.productos[prodIndex];
+
+            $("#eliminar-depto-nombre").val(departamento.nombre);
+            $("#eliminar-depto-producto-nombre").val(producto.nombre);
+            $("#eliminar-depto-producto-cantidad").attr("max", producto.cantidad);
+            $("#eliminar-depto-producto-cantidad").val(1);
+            showForm('eliminar-cantidad-departamento');
+        }
+
+        $("#form-eliminar-cantidad-departamento").on("submit", function (e) {
+            e.preventDefault();
+            const cantidadAEliminar = parseInt($("#eliminar-depto-producto-cantidad").val());
+            const departamento = departamentos[deptoEliminarIndex];
+            const producto = departamento.productos[productoDeptoEliminarIndex];
+
+            if (cantidadAEliminar > producto.cantidad) {
+                $("#eliminar-cantidad-departamento-error").text("La cantidad a eliminar es mayor que la disponible en el departamento.");
+                return;
+            }
+
+            producto.cantidad -= cantidadAEliminar;
+
+            if (producto.cantidad === 0) {
+                // Eliminar el producto del departamento si la cantidad es cero
+                departamento.productos.splice(productoDeptoEliminarIndex, 1);
+            }
+
+            guardarDatos();
+            listarDepartamentos();
+            alert("Cantidad eliminada con éxito del departamento");
+            closeForm('eliminar-cantidad-departamento');
+
+            // Registrar en auditoría
+            registrarAuditoria('Eliminar Cantidad Departamento', `Se eliminaron ${cantidadAEliminar} unidades del producto ${producto.nombre} del departamento ${departamento.nombre}`);
+        });
+
+        /* Función para generar reportes */
+        async function generarReporte(tipo) {
+            try {
+                // Obtener los filtros seleccionados
+                const fechaDesde = $("#filtro-fecha-desde").val();
+                const fechaHasta = $("#filtro-fecha-hasta").val();
+                const departamentoFiltro = $("#filtro-departamento").val();
+                const tipoMovimientoFiltro = $("#filtro-tipo-movimiento").val();
+                const productoFiltro = $("#filtro-producto").val();
+
+                const workbook = new ExcelJS.Workbook();
+
+                // Estilos generales
+                const tituloEstilo = {
+                    font: { size: 16, bold: true },
+                    alignment: { vertical: 'middle', horizontal: 'center' },
+                };
+
+                if (tipo === 'inventario') {
+                    const worksheet = workbook.addWorksheet('Inventario Actual');
+
+                    // Añadir título
+                    worksheet.mergeCells('A1', 'D2');
+                    worksheet.getCell('A1').value = 'Reporte de Inventario Actual';
+                    worksheet.getCell('A1').style = tituloEstilo;
+
+                    // Preparar datos
+                    const data = productos.map(producto => ({
+                        nombre: producto.nombre,
+                        cantidad: producto.cantidad,
+                        descripcion: producto.descripcion,
+                        minimo: producto.minimo
+                    }));
+
+                    // Añadir tabla
+                    worksheet.addTable({
+                        name: 'TablaInventario',
+                        ref: 'A4',
+                        headerRow: true,
+                        style: {
+                            theme: 'TableStyleMedium9',
+                            showRowStripes: true,
+                        },
+                        columns: [
+                            { name: 'Producto', filterButton: true },
+                            { name: 'Cantidad', filterButton: true },
+                            { name: 'Descripción', filterButton: true },
+                            { name: 'Stock Mínimo', filterButton: true },
+                        ],
+                        rows: data.map(item => [item.nombre, item.cantidad, item.descripcion, item.minimo]),
+                    });
+
+                    // Ajustar anchos de columna
+                    worksheet.columns.forEach(column => {
+                        column.width = 25;
+                    });
+
+                } else if (tipo === 'movimientos') {
+                    const worksheet = workbook.addWorksheet('Historial de Movimientos');
+
+                    // Añadir título
+                    worksheet.mergeCells('A1', 'E2');
+                    worksheet.getCell('A1').value = 'Reporte de Historial de Movimientos';
+                    worksheet.getCell('A1').style = tituloEstilo;
+
+                    // Preparar datos con filtros
+                    const data = movimientos.filter(movimiento => {
+                        let incluir = true;
+
+                        const fechaMovimiento = new Date(movimiento.fecha);
+
+                        if (fechaDesde && fechaMovimiento < new Date(fechaDesde)) {
+                            incluir = false;
+                        }
+                        if (fechaHasta && fechaMovimiento > new Date(fechaHasta)) {
+                            incluir = false;
+                        }
+                        if (departamentoFiltro && movimiento.departamento !== departamentoFiltro) {
+                            incluir = false;
+                        }
+                        if (tipoMovimientoFiltro && movimiento.tipo !== tipoMovimientoFiltro) {
+                            incluir = false;
+                        }
+                        if (productoFiltro && movimiento.producto !== productoFiltro) {
+                            incluir = false;
+                        }
+
+                        return incluir;
+                    }).map(movimiento => ({
+                        tipo: movimiento.tipo,
+                        producto: movimiento.producto,
+                        cantidad: movimiento.cantidad,
+                        fecha: movimiento.fecha,
+                        departamento: movimiento.departamento,
+                    }));
+
+                    // Añadir tabla
+                    worksheet.addTable({
+                        name: 'TablaMovimientos',
+                        ref: 'A4',
+                        headerRow: true,
+                        style: {
+                            theme: 'TableStyleMedium9',
+                            showRowStripes: true,
+                        },
+                        columns: [
+                            { name: 'Tipo', filterButton: true },
+                            { name: 'Producto', filterButton: true },
+                            { name: 'Cantidad', filterButton: true },
+                            { name: 'Fecha', filterButton: true },
+                            { name: 'Departamento', filterButton: true },
+                        ],
+                        rows: data.map(item => [item.tipo, item.producto, item.cantidad, item.fecha, item.departamento]),
+                    });
+
+                    // Ajustar anchos de columna
+                    worksheet.columns.forEach(column => {
+                        column.width = 25;
+                    });
+                }
+
+                // Descargar el archivo Excel
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+                // Crear enlace para descargar el archivo
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${tipo}-reporte.xlsx`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                alert('Reporte generado con éxito');
+            } catch (error) {
+                console.error("Error al generar el reporte:", error);
+                alert("Ocurrió un error al generar el reporte. Por favor, inténtalo de nuevo.");
+            }
+        }
+
+        $("#tipo-reporte").on("change", function () {
+            if ($(this).val() === "movimientos") {
+                $("#filtros-personalizados").show();
+                actualizarSelectsFiltros();
+            } else {
+                $("#filtros-personalizados").hide();
+            }
+        });
+
+        function actualizarSelectsFiltros() {
+            // Actualizar lista de departamentos
+            const $filtroDepartamento = $("#filtro-departamento").empty();
+            $filtroDepartamento.append('<option value="">Todos</option>');
+            departamentos.forEach(departamento => {
+                $filtroDepartamento.append(`<option value="${departamento.nombre}">${departamento.nombre}</option>`);
+            });
+
+            // Actualizar lista de productos
+            const $filtroProducto = $("#filtro-producto").empty();
+            $filtroProducto.append('<option value="">Todos</option>');
+            productos.forEach(producto => {
+                $filtroProducto.append(`<option value="${producto.nombre}">${producto.nombre}</option>`);
+            });
+        }
+
+        function obtenerDatosEntradasSalidas() {
+            const entradasPorMes = {};
+            const salidasPorMes = {};
+
+            movimientos.forEach(mov => {
+                const fecha = new Date(mov.fecha);
+                const mesAnio = `${fecha.getMonth() + 1}-${fecha.getFullYear()}`; // Formato: MM-YYYY
+
+                if (mov.tipo === 'Entrada') {
+                    entradasPorMes[mesAnio] = (entradasPorMes[mesAnio] || 0) + mov.cantidad;
+                } else if (mov.tipo === 'Salida') {
+                    salidasPorMes[mesAnio] = (salidasPorMes[mesAnio] || 0) + mov.cantidad;
+                }
+            });
+
+            return { entradasPorMes, salidasPorMes };
+        }
+
+        function obtenerProductosMasUsados() {
+            const productosUsados = {};
+
+            movimientos.forEach(mov => {
+                if (mov.tipo === 'Salida') {
+                    productosUsados[mov.producto] = (productosUsados[mov.producto] || 0) + mov.cantidad;
+                }
+            });
+
+            // Convertir a array y ordenar por cantidad
+            const productosOrdenados = Object.entries(productosUsados)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5); // Obtener los 5 más usados
+
+            return productosOrdenados;
+        }
+
+        function mostrarGraficoEntradasSalidas() {
+            const { entradasPorMes, salidasPorMes } = obtenerDatosEntradasSalidas();
+            const labels = Object.keys(entradasPorMes).sort();
+
+            const dataEntradas = labels.map(label => entradasPorMes[label] || 0);
+            const dataSalidas = labels.map(label => salidasPorMes[label] || 0);
+
+            const ctx = document.getElementById('grafico-entradas-salidas').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Entradas',
+                            data: dataEntradas,
+                            borderColor: 'green',
+                            fill: false,
+                        },
+                        {
+                            label: 'Salidas',
+                            data: dataSalidas,
+                            borderColor: 'red',
+                            fill: false,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                },
+            });
+        }
+
+        function mostrarGraficoProductosMasUsados() {
+            const productosMasUsados = obtenerProductosMasUsados();
+            const labels = productosMasUsados.map(item => item[0]);
+            const data = productosMasUsados.map(item => item[1]);
+
+            const ctx = document.getElementById('grafico-productos-mas-usados').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Cantidad',
+                            data: data,
+                            backgroundColor: 'blue',
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                },
+            });
+        }
+
+        /* Función para guardar datos en localStorage */
+        function guardarDatos() {
+            localStorage.setItem('productos', JSON.stringify(productos));
+            localStorage.setItem('departamentos', JSON.stringify(departamentos));
+            localStorage.setItem('movimientos', JSON.stringify(movimientos));
+            localStorage.setItem('auditoria', JSON.stringify(auditoria));
+        }
+
+        /* Función para verificar productos con bajo stock */
+        function checkLowStock() {
+            let lowStockProducts = productos.filter(producto => producto.cantidad <= producto.minimo);
+            if (lowStockProducts.length > 0) {
+                $("#alerta-stock").show();
+                $("#alerta-stock").off('click').on('click', function () {
+                    showLowStockProducts(lowStockProducts);
+                });
+            } else {
+                $("#alerta-stock").hide();
+            }
+        }
+
+        /* Función para mostrar productos con bajo stock */
+        function showLowStockProducts(lowStockProducts) {
+            const $tbody = $("#tabla-alertas tbody");
+            $tbody.empty();
+
+            lowStockProducts.forEach(producto => {
+                $tbody.append(`
+                <tr>
+                    <td>${producto.nombre}</td>
+                    <td>${producto.cantidad}</td>
+                    <td>${producto.minimo}</td>
+                </tr>
+            `);
+            });
+
+            showForm('ventana-alertas');
+        }
+
+        /* Función para registrar auditoría */
+        function registrarAuditoria(accion, detalle) {
+            auditoria.push({
+                usuario: usuarioActual,
+                accion,
+                detalle,
+                fecha: new Date().toISOString(),
+            });
+            localStorage.setItem('auditoria', JSON.stringify(auditoria));
+        }
+
+        /* Función para listar auditoría */
+        function listarAuditoria() {
+            const $tbody = $("#tabla-auditoria tbody");
+            $tbody.empty();
+
+            auditoria.forEach(registro => {
+                $tbody.append(`
+                <tr>
+                    <td>${registro.usuario}</td>
+                    <td>${registro.accion}</td>
+                    <td>${registro.detalle}</td>
+                    <td>${new Date(registro.fecha).toLocaleString()}</td>
+                </tr>
+            `);
+            });
+        }
+
+        /* Funciones para el escáner de código de barras */
+        function iniciarEscanerCodigo() {
+            // Mostrar el contenedor del escáner
+            document.getElementById('qr-reader').style.display = 'block';
+
+            let scanner = new Html5Qrcode("qr-reader");
+            scanner.start(
+                { facingMode: "environment" }, // Usar la cámara trasera
+                {
+                    fps: 10, // Velocidad de fotogramas por segundo
+                    qrbox: 250 // Tamaño del recuadro de escaneo
+                },
+                (decodedText, decodedResult) => {
+                    // Código detectado
+                    console.log(`Código detectado: ${decodedText}`);
+                    $("#codigo-producto").val(decodedText);
+                    // Detener el escáner
+                    scanner.stop().then(ignore => {
+                        document.getElementById('qr-reader').style.display = 'none';
+                    }).catch(err => {
+                        console.error('Error al detener el escáner:', err);
+                    });
+                },
+                (errorMessage) => {
+                    // Mensajes de error o resultados no exitosos
+                    console.warn('No se pudo detectar el código:', errorMessage);
+                }
+            ).catch(err => {
+                console.error('Error al iniciar el escáner:', err);
+            });
+        }
+
+    </script>
+</body>
+
+</html>
