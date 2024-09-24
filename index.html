@@ -2209,6 +2209,40 @@
         }
 
         /* Función para escanear código de barras y rellenar información */
+        function obtenerDatosProductoAPI(codigoBarras) {
+            const url = `https://api.upcitemdb.com/prod/trial/lookup?upc=${codigoBarras}`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        // Si la respuesta no es exitosa, lanzar un error con el código de estado
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.items && data.items.length > 0) {
+                        const item = data.items[0];
+                        // Rellenar los campos con los datos obtenidos
+                        $("#nombre-producto").val(item.title || '');
+                        $("#descripcion-producto").val(item.description || '');
+                        // Puedes asignar otros campos si están disponibles
+                        alert("Datos del producto obtenidos de la API y cargados en el formulario.");
+                    } else {
+                        alert("Producto no encontrado en la base de datos. Puedes ingresar la información manualmente.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al consultar la API:', error);
+                    if (error.message.includes('429')) {
+                        alert("Se ha excedido el límite de consultas diarias de la API. Por favor, inténtalo más tarde o ingresa los datos manualmente.");
+                    } else {
+                        alert("Ocurrió un error al consultar la información del producto.");
+                    }
+                });
+        }
+
+
         function iniciarEscanerCodigo() {
             // Mostrar el contenedor del escáner
             document.getElementById('qr-reader').style.display = 'block';
@@ -2232,7 +2266,14 @@
                     console.log(`Código detectado: ${decodedText}`);
                     $("#codigo-producto").val(decodedText);
 
-                    // Buscar el producto en la lista
+                    // Detener el escáner
+                    scanner.stop().then(ignore => {
+                        document.getElementById('qr-reader').style.display = 'none';
+                    }).catch(err => {
+                        console.error('Error al detener el escáner:', err);
+                    });
+
+                    // Buscar el producto en la lista local
                     const producto = productos.find(p => p.codigo === decodedText);
 
                     if (producto) {
@@ -2244,20 +2285,9 @@
 
                         alert("Producto encontrado y datos cargados en el formulario.");
                     } else {
-                        // Si el producto no existe, limpiar los campos para ingresar nueva información
-                        $("#nombre-producto").val('');
-                        $("#cantidad-producto").val('');
-                        $("#descripcion-producto").val('');
-                        $("#minimo-producto").val('');
-                        alert("Producto no encontrado. Puedes ingresar la información y agregarlo.");
+                        // Si el producto no existe localmente, consultar la API
+                        obtenerDatosProductoAPI(decodedText);
                     }
-
-                    // Detener el escáner
-                    scanner.stop().then(ignore => {
-                        document.getElementById('qr-reader').style.display = 'none';
-                    }).catch(err => {
-                        console.error('Error al detener el escáner:', err);
-                    });
                 },
                 (errorMessage) => {
                     // Mensajes de error o resultados no exitosos
@@ -2267,6 +2297,7 @@
                 console.error('Error al iniciar el escáner:', err);
             });
         }
+
 
     </script>
 
