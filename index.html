@@ -2210,23 +2210,15 @@
 
         /* Función para escanear código de barras y rellenar información */
         function obtenerDatosProductoAPI(codigoBarras) {
-            const url = `https://api.upcitemdb.com/prod/trial/lookup?upc=${codigoBarras}`;
+            const url = `https://world.openfoodfacts.org/api/v0/product/${codigoBarras}.json`;
 
             fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        // Si la respuesta no es exitosa, lanzar un error con el código de estado
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    if (data && data.items && data.items.length > 0) {
-                        const item = data.items[0];
-                        // Rellenar los campos con los datos obtenidos
-                        $("#nombre-producto").val(item.title || '');
-                        $("#descripcion-producto").val(item.description || '');
-                        // Puedes asignar otros campos si están disponibles
+                    if (data && data.status === 1) {
+                        const product = data.product;
+                        $("#nombre-producto").val(product.product_name || '');
+                        $("#descripcion-producto").val(product.generic_name || product.categories || '');
                         alert("Datos del producto obtenidos de la API y cargados en el formulario.");
                     } else {
                         alert("Producto no encontrado en la base de datos. Puedes ingresar la información manualmente.");
@@ -2234,13 +2226,57 @@
                 })
                 .catch(error => {
                     console.error('Error al consultar la API:', error);
-                    if (error.message.includes('429')) {
-                        alert("Se ha excedido el límite de consultas diarias de la API. Por favor, inténtalo más tarde o ingresa los datos manualmente.");
-                    } else {
-                        alert("Ocurrió un error al consultar la información del producto.");
-                    }
+                    alert("Ocurrió un error al consultar la información del producto.");
                 });
         }
+
+        function iniciarEscanerCodigo() {
+            document.getElementById('qr-reader').style.display = 'block';
+
+            let scanner = new Html5Qrcode("qr-reader");
+            scanner.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: 250,
+                    formatsToSupport: [
+                        Html5QrcodeSupportedFormats.EAN_13,
+                        Html5QrcodeSupportedFormats.UPC_A,
+                        Html5QrcodeSupportedFormats.UPC_E,
+                        Html5QrcodeSupportedFormats.CODE_128,
+                    ]
+                },
+                (decodedText, decodedResult) => {
+                    console.log(`Código detectado: ${decodedText}`);
+                    $("#codigo-producto").val(decodedText);
+
+                    scanner.stop().then(ignore => {
+                        document.getElementById('qr-reader').style.display = 'none';
+                    }).catch(err => {
+                        console.error('Error al detener el escáner:', err);
+                    });
+
+                    const producto = productos.find(p => p.codigo === decodedText);
+
+                    if (producto) {
+                        $("#nombre-producto").val(producto.nombre);
+                        $("#cantidad-producto").val(producto.cantidad);
+                        $("#descripcion-producto").val(producto.descripcion);
+                        $("#minimo-producto").val(producto.minimo);
+
+                        alert("Producto encontrado y datos cargados en el formulario.");
+                    } else {
+                        obtenerDatosProductoAPI(decodedText);
+                    }
+                },
+                (errorMessage) => {
+                    console.warn('No se pudo detectar el código:', errorMessage);
+                }
+            ).catch(err => {
+                console.error('Error al iniciar el escáner:', err);
+            });
+        }
+
 
 
         function iniciarEscanerCodigo() {
